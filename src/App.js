@@ -8,10 +8,14 @@ export default function App(){
     setItemList(itemList.filter((item => item.id !== itemId)))
   }
 
+  function updateItem(itemId){
+    setItemList(itemList.map((item => item.id === itemId ? {...item, packed: !item.packed} : item)))
+  }
+
   return <div className="app">
     <Header/>
     <Inputs setItemList={setItemList}/>
-    <List itemList={itemList} deteleItem={deteleItem}/>
+    <List itemList={itemList} deteleItem={deteleItem} updateItem={updateItem}/>
     <Summary/>
   </div>
 }
@@ -67,13 +71,13 @@ function Inputs({setItemList}) {
 )}
 
 
-function List({itemList, deteleItem}) {
+function List({itemList, deteleItem, updateItemgit}) {
 
   return (
     <div className="list">
       <ul>
           {itemList.map((currentObj) => (
-            <Item item={currentObj} deteleItem={deteleItem} key={currentObj.id}/>
+            <Item item={currentObj} deteleItem={deteleItem} updateItem={updateItem} key={currentObj.id}/>
             ))}
       </ul>
     </div>
@@ -81,10 +85,10 @@ function List({itemList, deteleItem}) {
 }
 
 
-function Item({item, deteleItem}) {
-
+function Item({item, deteleItem, updateItem}) {
 
   return <li> 
+    <input type="checkbox" value={item.checked} onChange={() => updateItem(item.id)}/>
       <span style={item.packed ? {textDecoration: 'line-through'} : {}}> 
           {`${item.selectVar}
           ${item.inputVar}`}
