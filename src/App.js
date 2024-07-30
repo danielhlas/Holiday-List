@@ -71,7 +71,7 @@ function Inputs({setItemList}) {
 )}
 
 
-function List({itemList, deteleItem, updateItemgit}) {
+function List({itemList, deteleItem, updateItem}) {
 
   return (
     <div className="list">
