@@ -2,4 +2,5 @@
 
 React app
 in progress...
-Preview: 
+
+Preview: https://holiday-list.netlify.app
