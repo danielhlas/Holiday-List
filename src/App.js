@@ -2,7 +2,7 @@ import {useState} from "react"
 
 
 export default function App(){
-  const [itemList, setItemList] = useState([]) //list všech itemů
+  let [itemList, setItemList] = useState([]) //list všech itemů
 
   function deteleItem(itemId){
     setItemList(itemList.filter((item => item.id !== itemId)))
@@ -12,18 +12,22 @@ export default function App(){
     setItemList(itemList.map((item => item.id === itemId ? {...item, packed: !item.packed} : item)))
   }
 
+  function clearList() {
+    setItemList(itemList=[])
+   }
+
   return <div className="app">
     <Header/>
     <Inputs setItemList={setItemList}/>
-    <List itemList={itemList} deteleItem={deteleItem} updateItem={updateItem}/>
-    <Summary/>
+    <List itemList={itemList} deteleItem={deteleItem} updateItem={updateItem} clearList={clearList}/>
+    <Summary itemList={itemList}/>
   </div>
 }
 
 
 
 //////////////
-//COMPONENTS
+//HEADER
 //////////////
 function Header() {
   return <h1>📋 Holiday List 📋</h1>
@@ -71,20 +75,48 @@ function Inputs({setItemList}) {
 )}
 
 
-function List({itemList, deteleItem, updateItem}) {
+//////////////
+//LIST
+//////////////
+function List({itemList, deteleItem, updateItem, clearList}) {
+
+  const [orderType, setOrderType] = useState("sortByInput") 
+  let orderedList = []
+
+  if (orderType==="sortByInput") orderedList = itemList
+
+  if (orderType==="sortByName") orderedList = itemList.slice().sort((a,b) => a.inputVar.localeCompare(b.inputVar)) 
+
+  if (orderType==="sortByPacked") orderedList = itemList.slice().sort((a,b) => Number(a.packed) - Number(b.packed))
+
+
 
   return (
     <div className="list">
       <ul>
-          {itemList.map((currentObj) => (
+          {orderedList.map((currentObj) => (
             <Item item={currentObj} deteleItem={deteleItem} updateItem={updateItem} key={currentObj.id}/>
             ))}
       </ul>
-    </div>
+
+      <div className="actions">
+          <select value={orderType} onChange={(e)=>setOrderType(e.target.value)}> 
+            <option value="sortByInput">Sort by Input order</option>
+            <option value="sortByName">Sort by name of the item</option>
+            <option value="sortByPacked">Sort by packed status</option>
+          </select>
+
+        <button onClick={clearList}>Clear the list</button>
+      </div>
+
+  </div>
         )
 }
 
 
+//////////////
+//ITEM
+//////////////
 function Item({item, deteleItem, updateItem}) {
 
   return <li> 
@@ -98,8 +130,29 @@ function Item({item, deteleItem, updateItem}) {
 }
 
 
-function Summary() {
+//////////////
+//SUMMARY
+//////////////
+function Summary({ itemList }) {
+
+  const numberOfPacked = itemList.filter(function(i) { return i.packed === true}).length
+  let howManyPacked = 0
+
+  //výpočet procent
+  if (itemList.length === 0){
+     howManyPacked = 0
+  }
+  else {
+    howManyPacked = Math.round((numberOfPacked/itemList.length)*100)
+  }
+
+  //je-li vše zabaleno, nepočítat statistiky
+  if (howManyPacked === 100) return <footer className="stats">  All packed! Enjoy your holiday! 🛫</footer> 
+
+  //není-li vše zabaleno, počítat statistiky
   return <footer className="stats">
-       {/* <em> You have __ items on your list, __ % items are already packed.</em> */}
+      <p> {itemList.length} {itemList.length === 1 ? "item" : "items"} on the list.</p>
+      <p> {`${howManyPacked} % already packed.`}
+      </p>
     </footer>
 }
